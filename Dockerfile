@@ -32,4 +32,4 @@ EXPOSE 8000
 # prod — multiple worker processes via gunicorn, each running FastAPI
 # through uvicorn's ASGI worker class (gunicorn itself is WSGI-only,
 # this is the standard way to run an ASGI app under it)
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120", "main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120", "main:app"]
