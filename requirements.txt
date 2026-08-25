@@ -11,8 +11,8 @@ attrs==26.1.0
 backoff==2.2.1
 beautifulsoup4==4.15.0
 blinker==1.9.0
-boto3==1.43.78
-botocore==1.43.78
+# removed boto packages
+
 cachetools==7.1.7
 certifi==2026.7.22
 cffi==2.1.1
@@ -148,4 +148,4 @@ yarl==1.24.5
 zipp==4.1.0
 
 dvc[s3]==3.67.1
-awscli==1.46.0
+# awscli package deleted
