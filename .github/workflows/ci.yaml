@@ -46,33 +46,33 @@ jobs:
         run: |
           dvc repro
 
-      # # Not yet written — add tests/test_model.py first (model load +
-      # # predict smoke test, metrics-threshold check).
-      # - name: Run model tests
-      #   env:
-      #     DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
-      #   run: |
-      #     python -m unittest tests/test_model.py
+      - name: Run model tests
+        env:
+          CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
+        run: |
+          python -m unittest tests/test_model.py
+ 
+      # Mirrors src/model/register_model.py's alias-based convention —
+      # moves the "staging" alias to "production" rather than
+      # registering a new version.
+      - name: Promote model to production
+        if: success()
+        env:
+          CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
+        run: |
+          python scripts/promote_model.py
+ 
+      # URLGuard's endpoint is FastAPI (app/main.py), not Flask — uses
+      # FastAPI's TestClient against the real / and /predict routes.
+      - name: Run FastAPI app tests
+        if: success()
+        env:
+          CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
+        run: |
+          python -m unittest tests/test_app.py
 
-      # # Not yet written — mirrors src/model/register_model.py but moves
-      # # the "staging" alias to "production" via MlflowClient instead of
-      # # registering a new version.
-      # - name: Promote model to production
-      #   if: success()
-      #   env:
-      #     DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
-      #   run: python scripts/promote_model.py
 
-      # # Renamed from "Flask app tests" — URLGuard's endpoint is FastAPI
-      # # (app/main.py), not Flask. Not yet written — use FastAPI's
-      # # TestClient (from fastapi.testclient import TestClient) against
-      # # the app's / and /predict routes.
-      # - name: Run FastAPI app tests
-      #   if: success()
-      #   env:
-      #     DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
-      #   run: python -m unittest tests/test_app.py
-
+      
       # - name: Login to AWS ECR
       #   if: success()
       #   run: |
