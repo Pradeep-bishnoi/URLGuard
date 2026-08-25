@@ -1,0 +1,22 @@
+# Keeps the Docker build context small and avoids leaking secrets/data
+# into image layers. Adjust once you write the actual Dockerfile,
+# depending on whether it builds from the project root or from app/.
+
+.git/
+.dvc/
+data/
+notebooks/
+local_s3/
+logs/
+reports/
+tests/
+docs/
+references/
+urlEnv/
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+*.md

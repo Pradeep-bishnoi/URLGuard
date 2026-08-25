@@ -1,0 +1,59 @@
+# dvc.yaml
+
+stages:
+  data_ingestion:
+    cmd: python -m src.data.data_ingestion
+    deps:
+    - src/data/data_ingestion.py
+    params:
+    - data_ingestion.data_path
+    - data_ingestion.test_size
+    outs:
+    - data/raw
+
+  data_preprocessing:
+    cmd: python -m src.data.data_preprocessing
+    deps:
+    - data/raw
+    - src/data/data_preprocessing.py
+    outs:
+    - data/interim
+
+  feature_engineering:
+    cmd: python -m src.features.feature_engineering
+    deps:
+    - data/interim
+    - src/features/feature_engineering.py
+    outs:
+    - data/processed
+    - models/preprocessor.pkl
+
+  model_building:
+    cmd: python -m src.model.model_building
+    deps:
+    - data/processed
+    - src/model/model_building.py
+    params:
+    - model_building.n_estimators
+    - model_building.learning_rate
+    - model_building.max_depth
+    outs:
+    - models/model.pkl
+
+  model_evaluation:
+    cmd: python -m src.model.model_evaluation
+    deps:
+    - models/model.pkl
+    - src/model/model_evaluation.py
+    metrics:
+    - reports/metrics.json:
+        cache: false
+    outs:
+    - reports/experiment_info.json
+    - reports/feature_importance.csv
+
+  model_registration:
+    cmd: python -m src.model.register_model
+    deps:
+    - reports/experiment_info.json
+    - src/model/register_model.py

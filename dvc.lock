@@ -1,0 +1,116 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python -m src.data.data_ingestion
+    deps:
+    - path: src/data/data_ingestion.py
+      hash: md5
+      md5: 6fa9c2e75bbb69d439fba51623b377e2
+      size: 4417
+    params:
+      params.yaml:
+        data_ingestion.data_path: notebooks/PhiUSIIL_Phishing_URL_Dataset.csv
+        data_ingestion.test_size: 0.2
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: d5abeb8b54bee18552bcfd3c86d6f668.dir
+      size: 59157088
+      nfiles: 2
+  data_preprocessing:
+    cmd: python -m src.data.data_preprocessing
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: d5abeb8b54bee18552bcfd3c86d6f668.dir
+      size: 59157088
+      nfiles: 2
+    - path: src/data/data_preprocessing.py
+      hash: md5
+      md5: b33173ec915d494fae5b6616dabbf16a
+      size: 2896
+    outs:
+    - path: data/interim
+      hash: md5
+      md5: dfa79d619c6b0c688e5c909bc9e513eb.dir
+      size: 37711552
+      nfiles: 2
+  feature_engineering:
+    cmd: python -m src.features.feature_engineering
+    deps:
+    - path: data/interim
+      hash: md5
+      md5: dfa79d619c6b0c688e5c909bc9e513eb.dir
+      size: 37711552
+      nfiles: 2
+    - path: src/features/feature_engineering.py
+      hash: md5
+      md5: 0c7c9fe816bd79b063a11a3bf8a76a7f
+      size: 4947
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 6c08cca69fa4a417c3e1930dd9db475e.dir
+      size: 172741348
+      nfiles: 2
+    - path: models/preprocessor.pkl
+      hash: md5
+      md5: 5f5f7a2eece7a8032fba65c15c894b2d
+      size: 3961
+  model_building:
+    cmd: python -m src.model.model_building
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 6c08cca69fa4a417c3e1930dd9db475e.dir
+      size: 172741348
+      nfiles: 2
+    - path: src/model/model_building.py
+      hash: md5
+      md5: 94361be4728f62da552ea453354afcec
+      size: 2720
+    params:
+      params.yaml:
+        model_building.learning_rate: 0.1
+        model_building.max_depth: 6
+        model_building.n_estimators: 300
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: 19561fdf4000e4e211443481ab3bdb5e
+      size: 248522
+  model_evaluation:
+    cmd: python -m src.model.model_evaluation
+    deps:
+    - path: models/model.pkl
+      hash: md5
+      md5: 19561fdf4000e4e211443481ab3bdb5e
+      size: 248522
+    - path: src/model/model_evaluation.py
+      hash: md5
+      md5: 4e431e0b2b795e300edd83a51988e7fc
+      size: 6950
+    outs:
+    - path: reports/experiment_info.json
+      hash: md5
+      md5: b4b81b3a88e7a554bf31a5558e7936b3
+      size: 118
+    - path: reports/feature_importance.csv
+      hash: md5
+      md5: ab3836d72ec2ca2124be1a83b009d54a
+      size: 1144
+    - path: reports/metrics.json
+      hash: md5
+      md5: 152cd3400287c889a9bdb737ce046cdf
+      size: 245
+  model_registration:
+    cmd: python -m src.model.register_model
+    deps:
+    - path: reports/experiment_info.json
+      hash: md5
+      md5: b4b81b3a88e7a554bf31a5558e7936b3
+      size: 118
+    - path: src/model/register_model.py
+      hash: md5
+      md5: 2c04535f13aa452d8f33b5aa69a5893b
+      size: 3216

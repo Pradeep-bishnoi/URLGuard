@@ -1,0 +1,11 @@
+data_ingestion:
+  data_path: notebooks/PhiUSIIL_Phishing_URL_Dataset.csv   # swap for the full PhiUSIIL CSV or an S3 URI later
+  test_size: 0.20
+
+# feature_engineering:
+#   (params for feature_engineering.py go here once it's built)
+
+model_building:
+  n_estimators: 300
+  learning_rate: 0.1
+  max_depth: 6

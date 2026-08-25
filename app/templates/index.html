@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>URLGuard — Network Security URL Detection</title>
+<style>
+  :root {
+    --bg: #0f1420;
+    --panel: #1a2132;
+    --border: #2a3350;
+    --text: #e8ecf5;
+    --muted: #8a93a8;
+    --safe: #2ecc71;
+    --suspicious: #f1c40f;
+    --phishing: #e74c3c;
+    --accent: #3b82f6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    margin: 0;
+    padding: 0 20px 40px;
+  }
+  header {
+    text-align: center;
+    padding: 28px 0 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { margin: 0; font-size: 22px; }
+  header p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+  .container { max-width: 760px; margin: 28px auto 0; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .panel h2 { margin: 0 0 14px; font-size: 15px; }
+  .input-row { display: flex; gap: 10px; }
+  input[type=text] {
+    flex: 1;
+    background: #232c42;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0 22px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  button.danger { background: var(--phishing); padding: 8px 16px; font-size: 13px; }
+  #result { font-size: 14px; }
+  #result .safe { color: var(--safe); font-weight: 700; }
+  #result .suspicious { color: var(--suspicious); font-weight: 700; }
+  #result .phishing { color: var(--phishing); font-weight: 700; }
+  #result .muted { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 6px; border-bottom: 1px solid var(--border); word-break: break-all; }
+  .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .history-header h2 { margin: 0; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 30px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Network Security URL Detection</h1>
+  <p>Analyze URLs for potential security threats</p>
+</header>
+
+<div class="container">
+
+  <div class="panel">
+    <h2>Enter URL</h2>
+    <div class="input-row">
+      <input type="text" id="urlInput" placeholder="https://example.com" autocomplete="off">
+      <button id="analyzeBtn" onclick="analyze()">Analyze</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Analysis Result</h2>
+    <div id="result"><span class="muted">Enter a URL above and click Analyze.</span></div>
+  </div>
+
+  <div class="panel">
+    <div class="history-header">
+      <h2>Analysis History</h2>
+      <button class="danger" onclick="clearHistory()">Clear History</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>URL</th><th>Result</th><th>Timestamp</th></tr>
+      </thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>URLGuard — Phishing URL Detection</footer>
+
+<script>
+const STORAGE_KEY = "urlguard_history";
+
+function loadHistory() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function saveHistory(entries) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+function resultClass(label) {
+  if (label === "Safe") return "safe";
+  if (label === "Suspicious") return "suspicious";
+  return "phishing";
+}
+
+function renderHistory() {
+  const entries = loadHistory();
+  const body = document.getElementById("historyBody");
+  body.innerHTML = "";
+  entries.slice().reverse().forEach(e => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${e.url}</td><td class="${resultClass(e.result)}">${e.result}</td><td>${e.timestamp}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+function clearHistory() {
+  localStorage.removeItem(STORAGE_KEY);
+  renderHistory();
+}
+
+async function analyze() {
+  const input = document.getElementById("urlInput");
+  const btn = document.getElementById("analyzeBtn");
+  const resultEl = document.getElementById("result");
+  const url = input.value.trim();
+  if (!url) return;
+
+  btn.disabled = true;
+  resultEl.innerHTML = '<span class="muted">Analyzing…</span>';
+
+  try {
+    const resp = await fetch("/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url })
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      resultEl.innerHTML = `<span class="phishing">Error: ${data.error}</span>`;
+      return;
+    }
+
+    const cls = resultClass(data.prediction);
+    const confidenceText = data.confidence != null
+      ? ` (confidence: ${(data.confidence * 100).toFixed(1)}%)`
+      : "";
+    resultEl.innerHTML = `The URL is <span class="${cls}">${data.prediction}</span>${confidenceText}`;
+
+    const entries = loadHistory();
+    entries.push({
+      url: data.url,
+      result: data.prediction,
+      timestamp: new Date().toLocaleString()
+    });
+    saveHistory(entries);
+    renderHistory();
+
+  } catch (err) {
+    resultEl.innerHTML = `<span class="phishing">Request failed: ${err}</span>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById("urlInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") analyze();
+});
+
+renderHistory();
+</script>
+
+</body>
+</html>
