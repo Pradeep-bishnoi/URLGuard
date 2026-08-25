@@ -27,9 +27,9 @@ COPY models/preprocessor.pkl /app/models/preprocessor.pkl
 EXPOSE 8000
 
 # local — single process, auto-detects code changes if bind-mounted
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # prod — multiple worker processes via gunicorn, each running FastAPI
 # through uvicorn's ASGI worker class (gunicorn itself is WSGI-only,
 # this is the standard way to run an ASGI app under it)
-# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120", "main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120", "main:app"]

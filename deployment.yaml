@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urlguard-app
+  labels:
+    app: urlguard-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: urlguard-app
+  template:
+    metadata:
+      labels:
+        app: urlguard-app
+    spec:
+      containers:
+      - name: urlguard-app
+        image: 002600770081.dkr.ecr.us-east-1.amazonaws.com/pradeep-urlguard-dev:latest 
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1"
+        env:
+        - name: DAGSHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: dagshub-secret
+              key: DAGSHUB_TOKEN
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urlguard-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: urlguard-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000

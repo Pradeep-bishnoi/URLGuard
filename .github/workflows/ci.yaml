@@ -101,24 +101,24 @@ jobs:
         run: |
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
 
-      # - name: Set Up kubectl
-      #   uses: azure/setup-kubectl@v3
-      #   with:
-      #     version: 'latest'
+      - name: Set Up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
 
-      # # Cluster name is a placeholder — replace with your actual EKS
-      # # cluster name once one exists; none has been created in this
-      # # project yet.
-      # - name: Update kubeconfig
-      #   run: |
-      #     aws eks update-kubeconfig --region us-east-1 --name urlguard-cluster
+      # Cluster name is a placeholder — replace with your actual EKS
+      # cluster name once one exists; none has been created in this
+      # project yet.
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name urlguard-cluster
 
-      # - name: Create Kubernetes Secret
-      #   run: |
-      #     kubectl create secret generic DAGSHUB_TOKEN-secret \
-      #       --from-literal=DAGSHUB_TOKEN=${{ secrets.DAGSHUB_TOKEN }} --dry-run=client -o yaml | kubectl apply -f -
+      - name: Create Kubernetes Secret
+        run: |
+          kubectl create secret generic DAGSHUB_TOKEN-secret \
+            --from-literal=DAGSHUB_TOKEN=${{ secrets.DAGSHUB_TOKEN }} --dry-run=client -o yaml | kubectl apply -f -
 
-      # # Requires deployment.yaml at the project root — not yet written.
-      # - name: Deploy to EKS
-      #   run: |
-      #     kubectl apply -f deployment.yaml
+      # Requires deployment.yaml at the project root — not yet written.
+      - name: Deploy to EKS
+        run: |
+          kubectl apply -f deployment.yaml
