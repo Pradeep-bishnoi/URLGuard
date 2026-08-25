@@ -48,7 +48,7 @@ jobs:
 
       - name: Run model tests
         env:
-          CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           python -m unittest tests/test_model.py
  
@@ -58,7 +58,7 @@ jobs:
       - name: Promote model to production
         if: success()
         env:
-          CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           python scripts/promote_model.py
  
@@ -67,7 +67,7 @@ jobs:
       - name: Run FastAPI app tests
         if: success()
         env:
-          CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           python -m unittest tests/test_app.py
 
