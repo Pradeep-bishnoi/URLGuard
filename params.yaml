@@ -1,5 +1,5 @@
 data_ingestion:
-  data_path: notebooks/PhiUSIIL_Phishing_URL_Dataset.csv   # swap for the full PhiUSIIL CSV or an S3 URI later
+  data_path: notebooks/exp_data.csv   # swap for the full PhiUSIIL CSV or an S3 URI later
   test_size: 0.20
 
 # feature_engineering:
