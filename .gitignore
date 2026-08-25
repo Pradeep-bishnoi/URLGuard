@@ -78,3 +78,6 @@ Thumbs.db
 # --- Kubernetes / AWS local config (never commit) ---
 kubeconfig
 *.kubeconfig
+
+
+notebooks/
