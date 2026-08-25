@@ -26,6 +26,7 @@ jobs:
       - name: install dependencies
         run: |
           pip install -r requirements.txt
+          pip install dvc
 
       # `local_s3` is unreachable from a GitHub Actions runner. This step
       # requires a `dagshub_storage` remote already committed in
